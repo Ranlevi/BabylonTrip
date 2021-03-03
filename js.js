@@ -32,14 +32,39 @@ points.push(new BABYLON.Vector3(-2, -2, 0));
 points.push(points[0]); //close the triangle;
 let cube = BABYLON.MeshBuilder.CreateLines("triangle", {points: points})
 
-points = [
-    points.push(new BABYLON.Vector3(2, -2, 0));
-];
+points = [];
+points.push(new BABYLON.Vector3(2, 0, 0));
+points.push(new BABYLON.Vector3(2, -1, 0));
+points.push(new BABYLON.Vector3(1, -2, 0));
+let lat = BABYLON.MeshBuilder.CreateLathe("lat", {shape: points}, scene);
 
+const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+const panel = new BABYLON.GUI.StackPanel();
+panel.width = "220px";
+panel.top   = "-50px";
+panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+adt.addControl(panel);
+const slider = new BABYLON.GUI.Slider();
+slider.minimum = 0;
+slider.maximum = 1;
+slider.borderColor = "black";
+slider.color = "#AAAAAA";
+slider.background = "#white";
+slider.value = 1;
+slider.height = "20px";
+slider.width = "200px";
+panel.addControl(slider);
+
+let speed = 0.5;
+
+slider.onValueChangedObservable.add((value) => {
+  speed = 0.5 + value;
+});
 
 engine.runRenderLoop(function () {
     
-    box.position.z -= 1.1;
+    box.position.z -= speed;
     cube.rotation.z += BABYLON.Tools.ToRadians(5);
 
     if (random.UNITY<0.5){
