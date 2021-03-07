@@ -1,28 +1,40 @@
 //Space change scene
 //camera moves along a 3d line. make lots of points. move position on them. 
 //can have guided tour mode , or manual moving
-
 //Music - spotify/sound clound? 
-
 //Reddit integration:
-/*
-Image gallery
+// Image gallery
 
-*/
+//Spining Cube in the center
+//Camera Path
+//Guided Tour/Manual Modes
 
 const canvas= document.querySelector("#renderCanvas")
 const engine= new BABYLON.Engine(canvas, true);
 let   scene=  new BABYLON.Scene(engine);
 
-//Camera Path
-let bezier2 = BABYLON.Curve3.CreateQuadraticBezier(
-  new BABYLON.Vector3(10,0,-10), //Start
-  new BABYLON.Vector3(7,4,-7),   //Control
-  new BABYLON.Vector3(10,10,0),  //Destination
-  100                            //Num of points
-); 
+let light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
 
-let cam_points = bezier2.getPoints();
+const Mat = new BABYLON.StandardMaterial("Mat", scene);
+Mat.diffuseColor = new BABYLON.Color3(0,1,0);
+
+const box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+box.material = Mat;
+
+//Camera Path
+let catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
+  [
+  new BABYLON.Vector3(0,0,-10),
+  new BABYLON.Vector3(10,0,0),
+  new BABYLON.Vector3(0,10,0),
+  new BABYLON.Vector3(0,0,10),
+  new BABYLON.Vector3(-10,-10,10),
+  new BABYLON.Vector3(-10,0,0)  
+  ],
+  60,    //Num of points
+  true); //Closed curve
+
+let cam_points = catmullRom.getPoints();
 let current_position = 0;
 
 let camera=  new BABYLON.UniversalCamera("UniversalCamera", cam_points[current_position], scene);
@@ -32,39 +44,53 @@ camera.minZ= 1 ;
 camera.attachControl(canvas, true);
 camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
 
-let light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
+//GUI
+const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+const panel = new BABYLON.GUI.StackPanel();
+panel.width = "220px";
+panel.top   = "-50px";
+panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+adt.addControl(panel);
 
-const Mat = new BABYLON.StandardMaterial("Mat", scene);
-Mat.diffuseColor = new BABYLON.Color3(0,1,0);
+//Guided Tour Mode
+let is_guided_tour = true;
 
-const box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-// box.position.z = 90;
-box.material = Mat;
+let button = BABYLON.GUI.Button.CreateSimpleButton("btn", "Guided Tour Mode");
+button.color = "#FFFFFF";
+button.value = 1;
+button.height = "50px";
+button.width = "100px";
+panel.addControl(button);
+
+button.onPointerClickObservable.add(() => {
+  
+  is_guided_tour = !is_guided_tour;
+  console.log(is_guided_tour);
+  if (is_guided_tour){
+    button.textBlock.text = "Manual Mode";
+  } else {
+    button.textBlock.text = "Guided Tour Mode";
+  }
+});
+
 
 
 engine.runRenderLoop(function () {
-    
-    // box.position.z -= speed;
-    // cube.rotation.z += BABYLON.Tools.ToRadians(5);
 
-    // if (random.UNITY<0.5){
-    //     box.rotation.x += BABYLON.Tools.ToRadians(5);    
-    // } else {
-    //     box.rotation.y += BABYLON.Tools.ToRadians(5);
-    // }
+    box.rotation.z += BABYLON.Tools.ToRadians(5);
     
-    // if (box.position.z<=-10) {
-    //     random = generate_randomness();
+    if (is_guided_tour){
 
-    //     box.position = new BABYLON.Vector3(random.X_OFFSET,random.Y_OFFSET,90);
-    //     box.scaling  = new BABYLON.Vector3(random.X_SCALE,random.Y_SCALE,random.Z_SCALE);
+      if (current_position===cam_points.length-1){
+        current_position = 0;
+      } else {
+        current_position += 1;      
+      }
 
-        
-    
-        
-    // }
-    
-        
+      camera.setTarget(BABYLON.Vector3.Zero());
+      camera.position = cam_points[current_position];
+    }
 
     scene.render();
 });
@@ -89,23 +115,52 @@ function generate_randomness(){
 
 scene.onKeyboardObservable.add((kbInfo) => {
 
-//   console.log(kbInfo.event.keyCode);
+  if (!is_guided_tour){
+    if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
 
-  if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
-    if (kbInfo.event.keyCode==32){
-      scene.clearColor = BABYLON.Color3.FromHexString("#2eaaaa");
-    } else if (kbInfo.event.keyCode==90){ //z
-    
-      current_position += 1;
+      if (kbInfo.event.keyCode==81){ //q
+        console.log('here');
+        if (current_position===cam_points.length-1){
+          current_position = 0;
+        } else {
+          current_position += 1;
+        } 
+        
+      } else if (kbInfo.event.keyCode==65){ //a
+        
+        if (current_position===0){
+          current_position=cam_points.length-1;
+        } else {
+          current_position -= 1;
+        }
+      }
+
       camera.position = cam_points[current_position];
-    //   camera.setTarget(BABYLON.Vector3.Zero());
+      camera.setTarget(BABYLON.Vector3.Zero());
+    }
+  }
+   
+});
+
+  
+
+  
+
+  // if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
+  //   if (kbInfo.event.keyCode==32){
+  //     scene.clearColor = BABYLON.Color3.FromHexString("#2eaaaa");
+  //   } else 
+    
+  //     current_position += 1;
+  //     camera.position = cam_points[current_position];
+  //   //   camera.setTarget(BABYLON.Vector3.Zero());
 
     //   console.log(camera.position);
 
-    }
-  } 
+    // }
+  // } 
 
-});
+
 
 // scene.clearColor = BABYLON.Color3.FromHexString("#2ecc71");
 // let random = generate_randomness();
@@ -126,13 +181,7 @@ scene.onKeyboardObservable.add((kbInfo) => {
 // points.push(new BABYLON.Vector3(1, -2, 0));
 // let lat = BABYLON.MeshBuilder.CreateLathe("lat", {shape: points}, scene);
 
-// const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-// const panel = new BABYLON.GUI.StackPanel();
-// panel.width = "220px";
-// panel.top   = "-50px";
-// panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-// panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-// adt.addControl(panel);
+
 // const slider = new BABYLON.GUI.Slider();
 // slider.minimum = 0;
 // slider.maximum = 1;
@@ -152,3 +201,31 @@ scene.onKeyboardObservable.add((kbInfo) => {
 // var camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -10), scene);
 // camera.setTarget(BABYLON.Vector3.Zero());
 // var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
+
+// let bezier2 = BABYLON.Curve3.CreateQuadraticBezier(
+//   new BABYLON.Vector3(10,0,-10), //Start
+//   new BABYLON.Vector3(7,4,-7),   //Control
+//   new BABYLON.Vector3(10,10,0),  //Destination
+//   100                            //Num of points
+// ); 
+
+
+    // box.position.z -= speed;
+    // cube.rotation.z += BABYLON.Tools.ToRadians(5);
+
+    // if (random.UNITY<0.5){
+    //     box.rotation.x += BABYLON.Tools.ToRadians(5);    
+    // } else {
+    //     box.rotation.y += BABYLON.Tools.ToRadians(5);
+    // }
+    
+    // if (box.position.z<=-10) {
+    //     random = generate_randomness();
+
+    //     box.position = new BABYLON.Vector3(random.X_OFFSET,random.Y_OFFSET,90);
+    //     box.scaling  = new BABYLON.Vector3(random.X_SCALE,random.Y_SCALE,random.Z_SCALE);
+
+        
+    
+        
+    // }
