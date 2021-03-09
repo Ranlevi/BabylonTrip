@@ -20,7 +20,8 @@ let   scene=  new BABYLON.Scene(engine);
 
 class SceneContent {
   constructor(scene){
-    this.light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
+    // this.light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
+    this.light = new BABYLON.DirectionalLight("Hemi", new BABYLON.Vector3(0,0,1), scene);
     this.mat   = new BABYLON.StandardMaterial("Mat", scene);
     this.mat.diffuseColor = new BABYLON.Color3(0,1,0);
     this.item  = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
@@ -37,57 +38,61 @@ class SceneContent {
 let content = new SceneContent(scene);
 
 //Camera Path
-let catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
-  [
-  new BABYLON.Vector3(0,0,-10),
-  new BABYLON.Vector3(10,0,0),
-  new BABYLON.Vector3(0,10,0),
-  new BABYLON.Vector3(0,0,10),
-  new BABYLON.Vector3(-10,-10,10),
-  new BABYLON.Vector3(-10,0,0)  
-  ],
-  60,    //Num of points
-  true); //Closed curve
+// let catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
+//   [
+//   new BABYLON.Vector3(0,0,-10),
+//   new BABYLON.Vector3(10,0,0),
+//   new BABYLON.Vector3(0,10,0),
+//   new BABYLON.Vector3(0,0,10),
+//   new BABYLON.Vector3(-10,-10,10),
+//   new BABYLON.Vector3(-10,0,0)  
+//   ],
+//   60,    //Num of points
+//   true); //Closed curve
 
-let cam_points = catmullRom.getPoints();
-let current_position = 0;
+// let cam_points = catmullRom.getPoints();
+// let current_position = 0;
 
-let camera=  new BABYLON.UniversalCamera("UniversalCamera", cam_points[current_position], scene);
-camera.setTarget(BABYLON.Vector3.Zero());
+let camera = new BABYLON.ArcRotateCamera("ArcCam",0,0,10,new BABYLON.Vector3(0,0,0),scene);
+
+
+// let camera=  new BABYLON.UniversalCamera("UniversalCamera", cam_points[current_position], scene);
+// camera.setTarget(BABYLON.Vector3.Zero());
 camera.maxZ= 100;
 camera.minZ= 1 ;
 camera.attachControl(canvas, true);
-camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
+// camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
 
 //GUI
-const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-const panel = new BABYLON.GUI.StackPanel();
-panel.width = "220px";
-panel.top   = "-50px";
-panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-adt.addControl(panel);
+// const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+// const panel = new BABYLON.GUI.StackPanel();
+// panel.width = "220px";
+// panel.top   = "-50px";
+// panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+// panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+// adt.addControl(panel);
 
 //Guided Tour Mode
-let is_guided_tour = true;
+// let is_guided_tour = false;
 
-let button = BABYLON.GUI.Button.CreateSimpleButton("btn", "Guided Tour Mode");
-button.color = "#FFFFFF";
-button.value = 1;
-button.height = "50px";
-button.width = "100px";
-panel.addControl(button);
+// let button = BABYLON.GUI.Button.CreateSimpleButton("btn", "Enable Guided Tour Mode");
+// button.color = "#808080";
+// button.value = 1;
+// button.height = "100px";
+// button.width = "100px";
+// button.thickness = 2;
+// panel.addControl(button);
 
-button.onPointerClickObservable.add(() => {
+// button.onPointerClickObservable.add(() => {
   
-  is_guided_tour = !is_guided_tour;
-  console.log(is_guided_tour);
-  if (is_guided_tour){
-    button.textBlock.text = "Manual Mode";
-  } else {
-    button.textBlock.text = "Guided Tour Mode";
-  }
-});
+//   is_guided_tour = !is_guided_tour;
+  
+//   if (is_guided_tour){
+//     button.textBlock.text = "Switch To Manual Mode";
+//   } else {
+//     button.textBlock.text = "Switch To Guided Tour Mode";
+//   }
+// });
 
 
 
@@ -96,18 +101,19 @@ engine.runRenderLoop(function () {
     // box.rotation.z += BABYLON.Tools.ToRadians(5);
     content.item.rotation.z += BABYLON.Tools.ToRadians(5);
     
-    if (is_guided_tour){
+    // if (is_guided_tour){
 
-      if (current_position===cam_points.length-1){
-        current_position = 0;
-      } else {
-        current_position += 1;      
-      }
+    //   if (current_position===cam_points.length-1){
+    //     current_position = 0;
+    //   } else {
+    //     current_position += 1;      
+    //   }
 
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.position = cam_points[current_position];
-    }
-
+    //   // camera.setTarget(BABYLON.Vector3.Zero());
+    //   // camera.position = cam_points[current_position];
+    // }
+    // console.log('alpha ', camera.alpha);
+    // console.log('beta ', camera.beta);
     scene.render();
 });
 
@@ -131,36 +137,36 @@ function generate_randomness(){
 
 scene.onKeyboardObservable.add((kbInfo) => {
 
-  console.log(kbInfo.event.keyCode);
+  // console.log(kbInfo.event.keyCode);
 
-  if (!is_guided_tour){
-    if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
+  // if (!is_guided_tour){
+  //   if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
+  //     console.log(camera.position);
+  //     if (kbInfo.event.keyCode===81){ //q
+        
+  //       if (current_position===cam_points.length-1){
+  //         current_position = 0;
+  //       } else {
+  //         current_position += 1;
+  //       } 
+        
+  //     } else if (kbInfo.event.keyCode===65){ //a
+        
+  //       if (current_position===0){
+  //         current_position=cam_points.length-1;
+  //       } else {
+  //         current_position -= 1;
+  //       }
 
-      if (kbInfo.event.keyCode===81){ //q
+  //     } else if (kbInfo.event.keyCode===32){ //Space
         
-        if (current_position===cam_points.length-1){
-          current_position = 0;
-        } else {
-          current_position += 1;
-        } 
-        
-      } else if (kbInfo.event.keyCode===65){ //a
-        
-        if (current_position===0){
-          current_position=cam_points.length-1;
-        } else {
-          current_position -= 1;
-        }
+  //       content.changeContent();
+  //     }
 
-      } else if (kbInfo.event.keyCode===32){ //Space
-        
-        content.changeContent();
-      }
-
-      camera.position = cam_points[current_position];
-      camera.setTarget(BABYLON.Vector3.Zero());
-    }
-  }
+  //     camera.position = cam_points[current_position];
+  //     camera.setTarget(BABYLON.Vector3.Zero());
+  //   }
+  // }
    
 });
 
