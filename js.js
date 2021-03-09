@@ -9,17 +9,32 @@
 //Camera Path
 //Guided Tour/Manual Modes
 
+//Room 1:
+//floating boxes. Each side different color.
+//When viewed from the side, forms a bigger box of single color.
+
 const canvas= document.querySelector("#renderCanvas")
 const engine= new BABYLON.Engine(canvas, true);
 let   scene=  new BABYLON.Scene(engine);
 
-let light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
 
-const Mat = new BABYLON.StandardMaterial("Mat", scene);
-Mat.diffuseColor = new BABYLON.Color3(0,1,0);
+class SceneContent {
+  constructor(scene){
+    this.light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
+    this.mat   = new BABYLON.StandardMaterial("Mat", scene);
+    this.mat.diffuseColor = new BABYLON.Color3(0,1,0);
+    this.item  = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+    this.item.material = this.mat;
+  }
 
-const box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-box.material = Mat;
+  changeContent(){
+    this.item.dispose();
+    this.item  = BABYLON.MeshBuilder.CreateCylinder("cylinder", {}, scene);
+    this.item.material = this.mat;
+  }
+}
+
+let content = new SceneContent(scene);
 
 //Camera Path
 let catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
@@ -78,7 +93,8 @@ button.onPointerClickObservable.add(() => {
 
 engine.runRenderLoop(function () {
 
-    box.rotation.z += BABYLON.Tools.ToRadians(5);
+    // box.rotation.z += BABYLON.Tools.ToRadians(5);
+    content.item.rotation.z += BABYLON.Tools.ToRadians(5);
     
     if (is_guided_tour){
 
@@ -115,24 +131,30 @@ function generate_randomness(){
 
 scene.onKeyboardObservable.add((kbInfo) => {
 
+  console.log(kbInfo.event.keyCode);
+
   if (!is_guided_tour){
     if (kbInfo.type===BABYLON.KeyboardEventTypes.KEYDOWN){
 
-      if (kbInfo.event.keyCode==81){ //q
-        console.log('here');
+      if (kbInfo.event.keyCode===81){ //q
+        
         if (current_position===cam_points.length-1){
           current_position = 0;
         } else {
           current_position += 1;
         } 
         
-      } else if (kbInfo.event.keyCode==65){ //a
+      } else if (kbInfo.event.keyCode===65){ //a
         
         if (current_position===0){
           current_position=cam_points.length-1;
         } else {
           current_position -= 1;
         }
+
+      } else if (kbInfo.event.keyCode===32){ //Space
+        
+        content.changeContent();
       }
 
       camera.position = cam_points[current_position];
