@@ -21,17 +21,63 @@ let   scene=  new BABYLON.Scene(engine);
 class SceneContent {
   constructor(scene){
     // this.light = new BABYLON.PointLight("DirectionalLight", new BABYLON.Vector3(0, 0, -11), scene);
-    this.light = new BABYLON.DirectionalLight("Hemi", new BABYLON.Vector3(0,0,1), scene);
-    this.mat   = new BABYLON.StandardMaterial("Mat", scene);
-    this.mat.diffuseColor = new BABYLON.Color3(0,1,0);
-    this.item  = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-    this.item.material = this.mat;
+    this.lights = [];
+
+    let light = new BABYLON.DirectionalLight("Hemi", new BABYLON.Vector3(0,0,1), scene);
+    light.diffuse = BABYLON.Color3.FromHexString("#FF00FF");
+    this.lights.push(light);
+  
+    light = light.clone('light2');
+    light.direction = new BABYLON.Vector3(0,0,-1);
+    light.diffuse = BABYLON.Color3.FromHexString("#FF0000");
+    this.lights.push(light);
+
+    light = light.clone('light3');
+    light.direction = new BABYLON.Vector3(0,1,0);
+    light.diffuse = BABYLON.Color3.FromHexString("#00FF00");
+    this.lights.push(light);
+
+    light = light.clone('light4');
+    light.direction = new BABYLON.Vector3(0,-1,0);
+    light.diffuse = BABYLON.Color3.FromHexString("#00FFFF");
+    this.lights.push(light);
+
+    light = light.clone('light5');
+    light.direction = new BABYLON.Vector3(1,0,0);
+    light.diffuse = BABYLON.Color3.FromHexString("#FFD79F");
+    this.lights.push(light);
+
+    light = light.clone('light5');
+    light.direction = new BABYLON.Vector3(-1,0,0);
+    light.diffuse = BABYLON.Color3.FromHexString("#FFD79F");
+    this.lights.push(light);
+    // this.mat   = new BABYLON.StandardMaterial("Mat", scene);
+    // this.mat.diffuseColor = new BABYLON.Color3(0,1,0);
+
+    this.items = [];
+    
+    let item  = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+    // item.material = this.mat;
+    item.position = new BABYLON.Vector3(0,0,-1);
+    this.items.push(item);
+
+    item = item.clone("box2");
+    item.position = new BABYLON.Vector3(1,0,0);
+    this.items.push(item);
+
+    item = item.clone("box3");
+    item.position = new BABYLON.Vector3(0,1,0);
+    this.items.push(item);
+
+    item = item.clone("box4");
+    item.position = new BABYLON.Vector3(1,1,-1);
+    this.items.push(item);
   }
 
   changeContent(){
-    this.item.dispose();
-    this.item  = BABYLON.MeshBuilder.CreateCylinder("cylinder", {}, scene);
-    this.item.material = this.mat;
+    // this.item.dispose();
+    // this.item  = BABYLON.MeshBuilder.CreateCylinder("cylinder", {}, scene);
+    // this.item.material = this.mat;
   }
 }
 
@@ -54,7 +100,7 @@ let content = new SceneContent(scene);
 // let current_position = 0;
 
 let camera = new BABYLON.ArcRotateCamera("ArcCam",0,0,10,new BABYLON.Vector3(0,0,0),scene);
-
+console.log(camera.position);
 
 // let camera=  new BABYLON.UniversalCamera("UniversalCamera", cam_points[current_position], scene);
 // camera.setTarget(BABYLON.Vector3.Zero());
@@ -99,7 +145,7 @@ camera.attachControl(canvas, true);
 engine.runRenderLoop(function () {
 
     // box.rotation.z += BABYLON.Tools.ToRadians(5);
-    content.item.rotation.z += BABYLON.Tools.ToRadians(5);
+    // content.item.rotation.z += BABYLON.Tools.ToRadians(5);
     
     // if (is_guided_tour){
 
